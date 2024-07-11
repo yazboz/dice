@@ -256,6 +256,33 @@
             });
             updateScoreboard();
         }
+        document.addEventListener("DOMContentLoaded", function() {
+  const imagePaths = [
+    'src/img/1.png',
+    'src/img/2.png',
+    'src/img/3.png',
+    'src/img/4.png',
+    'src/img/5.png',
+    'src/img/6.png'
+  ];
+
+  let loadedImages = 0;
+
+  imagePaths.forEach(function(path) {
+    const img = new Image();
+    img.src = path;
+    img.onload = function() {
+      loadedImages++;
+      if (loadedImages === imagePaths.length) {
+        console.log('Tüm resimler önyüklendi');
+      }
+    };
+    img.onerror = function() {
+      console.error('Resim önyüklenemedi:', path);
+    };
+  });
+});
+
     </script>
 </body>
 </html>
