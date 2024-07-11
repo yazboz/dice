@@ -1,11 +1,261 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Zar Oyunu</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .zar {
+            width: 100px;
+            height: 100px;
+            background-size: cover;
+            cursor: pointer;
+            transition: filter 0.3s;
+        }
+        .locked {
+            filter: brightness(0.7); /* Arka planı koyulaştır */
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: row;
+            height: 100vh;
+            padding-top: 20px;
+        }
+        .game-container {
+            position: relative;
+            width: 400px;
+            height: 280px;
+            border: .5px solid #00000013;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 sütun */
+            grid-template-rows: repeat(2, 1fr); /* 2 satır */
+            justify-items: center; /* Zarları yatayda ortalar */
+            align-items: center; /* Zarları dikeyde ortalar */
+            padding: 60px 40px; /* Padding arttırıldı */
+            gap: 10px; /* Zarlar arasındaki boşluk */
+        }
+        .info {
+            position: absolute;
+            top: 10px;
+            font-size: 1.2em;
+        }
+        .roll-count {
+            left: 10px;
+        }
+        .timer {
+            right: 10px;
+        }
+        .btn-roll {
+            margin-top: 20px;
+        }
+        .btn-restart {
+            display: none; /* Başlangıçta gizli */
+            margin-top: 10px;
+        }
+        .scoreboard {
+            margin-left: 40px;
+            border: 1px solid #000;
+            padding: 20px;
+            width: 400px;
+        }
+        .scoreboard table {
+            width: 100%;
+        }
+        .scoreboard th, .scoreboard td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
-    <div class="selam"></div>
+    <div class="container" style="display: flex; justify-content: center; width: 100%; align-items: center;">
+        <div style="display: grid;">
+            <div class="game-container">
+                <div class="info roll-count">Rolls: 0</div>
+                <div class="info timer">Time: 00:00:000</div>
+                <div class="zar" onclick="lockDice(this)"></div>
+                <div class="zar" onclick="lockDice(this)"></div>
+                <div class="zar" onclick="lockDice(this)"></div>
+                <div class="zar" onclick="lockDice(this)"></div>
+                <div class="zar" onclick="lockDice(this)"></div>
+                <div class="zar" onclick="lockDice(this)"></div>
+            </div>
+            <button id="roll-button" class="btn btn-primary btn-lg btn-roll m-auto" onclick="rollDice()">Roll</button>
+            <input type="text" id="nickname" class="form-control btn-restart" placeholder="nickname" oninput="checkNickname()">
+            <button id="restart-button" class="btn btn-secondary btn-lg btn-restart" onclick="restartGame()" disabled>Tekrar Oyna</button>
+            <p id="message"></p>
+        </div>
+        <div class="scoreboard">
+            <h2>Scoreboard</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sıra No</th>
+                        <th>Nickname</th>
+                        <th>Count</th>
+                        <th>Countdown</th>
+                    </tr>
+                </thead>
+                <tbody id="scoreboard-body">
+                    <!-- Skorlar burada görünecek -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let rollCount = 0;
+        let startTime;
+        let timerInterval;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadScoreboard();
+        });
+
+        function rollDice() {
+            if (rollCount === 0) {
+                startTime = new Date();
+                timerInterval = setInterval(updateTimer, 10);
+            }
+
+            rollCount++;
+            document.querySelector('.roll-count').innerText = `Rolls: ${rollCount}`;
+
+            let dice = document.getElementsByClassName("zar");
+            let allSame = true;
+            let firstValue = null;
+
+            for (let i = 0; i < dice.length; i++) {
+                if (!dice[i].classList.contains("locked")) {
+                    let randomNum = Math.floor(Math.random() * 6) + 1; // 1 ile 6 arasında rastgele bir sayı
+                    dice[i].dataset.value = randomNum;
+                    dice[i].style.backgroundImage = `url(${randomNum}.jpeg)`;
+                }
+                if (firstValue === null) {
+                    firstValue = dice[i].dataset.value;
+                } else if (firstValue != dice[i].dataset.value) {
+                    allSame = false;
+                }
+            }
+
+            if (allSame) {
+                document.getElementById("message").innerText = "Oyunu Kazandınız!";
+                clearInterval(timerInterval);
+                document.getElementById("roll-button").disabled = true; // Roll butonunu deaktif et
+                document.getElementById("nickname").style.display = "block"; // Nickname inputunu göster
+                document.getElementById("restart-button").style.display = "block"; // Tekrar Oyna butonunu göster
+            } else {
+                document.getElementById("message").innerText = "";
+            }
+        }
+
+        function lockDice(die) {
+            die.classList.toggle("locked");
+        }
+
+        function updateTimer() {
+            let now = new Date();
+            let elapsedTime = now - startTime;
+            
+            let minutes = Math.floor(elapsedTime / 60000);
+            let seconds = Math.floor((elapsedTime % 60000) / 1000);
+            let milliseconds = elapsedTime % 1000;
+            
+            document.querySelector('.timer').innerText = 
+                `Time: ${pad(minutes)}:${pad(seconds)}:${pad(milliseconds, 3)}`;
+        }
+
+        function pad(number, length = 2) {
+            return number.toString().padStart(length, '0');
+        }
+
+        function checkNickname() {
+            let nickname = document.getElementById("nickname").value;
+            document.getElementById("restart-button").disabled = nickname.trim() === "";
+        }
+
+        function restartGame() {
+            let nickname = document.getElementById("nickname").value.trim();
+            if (nickname === "") return;
+
+            let count = rollCount;
+            let countdown = document.querySelector('.timer').innerText.replace("Time: ", "");
+
+            let scoreboardBody = document.getElementById("scoreboard-body");
+            let newRow = document.createElement("tr");
+            newRow.innerHTML = `<td></td><td>${nickname}</td><td>${count}</td><td>${countdown}</td>`;
+            scoreboardBody.appendChild(newRow);
+
+            updateScoreboard();
+
+            rollCount = 0;
+            document.querySelector('.roll-count').innerText = "Rolls: 0";
+            document.querySelector('.timer').innerText = "Time: 00:00:000";
+            document.getElementById("message").innerText = "";
+            document.getElementById("roll-button").disabled = false; // Roll butonunu aktif et
+            document.getElementById("nickname").style.display = "none"; // Nickname inputunu gizle
+            document.getElementById("nickname").value = ""; // Nickname inputunu temizle
+            document.getElementById("restart-button").style.display = "none"; // Tekrar Oyna butonunu gizle
+            document.getElementById("restart-button").disabled = true; // Tekrar Oyna butonunu devre dışı bırak
+
+            let dice = document.getElementsByClassName("zar");
+            for (let i = 0; i < dice.length; i++) {
+                dice[i].classList.remove("locked");
+                dice[i].style.backgroundImage = "";
+            }
+
+            clearInterval(timerInterval);
+        }
+
+        function updateScoreboard() {
+            let scoreboardBody = document.getElementById("scoreboard-body");
+            let rows = Array.from(scoreboardBody.getElementsByTagName("tr"));
+
+            rows.sort((a, b) => {
+                let timeA = a.children[3].innerText;
+                let timeB = b.children[3].innerText;
+                return convertTimeToMilliseconds(timeA) - convertTimeToMilliseconds(timeB);
+            });
+
+            scoreboardBody.innerHTML = "";
+            rows.slice(0, 10).forEach((row, index) => {
+                row.children[0].innerText = index + 1;
+                scoreboardBody.appendChild(row);
+            });
+
+            saveScoreboard();
+        }
+
+        function convertTimeToMilliseconds(time) {
+            let [minutes, seconds, milliseconds] = time.split(":").map(Number);
+            return (minutes * 60000) + (seconds * 1000) + milliseconds;
+        }
+
+        function saveScoreboard() {
+            let scoreboardBody = document.getElementById("scoreboard-body");
+            let rows = Array.from(scoreboardBody.getElementsByTagName("tr"));
+            let scores = rows.map(row => {
+                return {
+                    rank: row.children[0].innerText,
+                    nickname: row.children[1].innerText,
+                    count: row.children[2].innerText,
+                    countdown: row.children[3].innerText
+                };
+            });
+            localStorage.setItem("scores", JSON.stringify(scores.slice(0, 10))); // İlk 10 skoru sakla
+        }
+
+        function loadScoreboard() {
+            let scores = JSON.parse(localStorage.getItem("scores") || "[]");
+            let scoreboardBody = document.getElementById("scoreboard-body");
+            scores.forEach(score => {
+                let newRow = document.createElement("tr");
+                newRow.innerHTML = `<td>${score.rank}</td><td>${score.nickname}</td><td>${score.count}</td><td>${score.countdown}</td>`;
+                scoreboardBody.appendChild(newRow);
+            });
+            updateScoreboard();
+        }
+    </script>
 </body>
 </html>
