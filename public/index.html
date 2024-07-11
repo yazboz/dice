@@ -130,7 +130,7 @@
                 if (!dice[i].classList.contains("locked")) {
                     let randomNum = Math.floor(Math.random() * 6) + 1; // 1 ile 6 arasında rastgele bir sayı
                     dice[i].dataset.value = randomNum;
-                    dice[i].style.backgroundImage = `url(${randomNum}.png)`;
+                    dice[i].style.backgroundImage = `url(src/img/${randomNum}.png)`;
                 }
                 if (firstValue === null) {
                     firstValue = dice[i].dataset.value;
