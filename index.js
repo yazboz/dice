@@ -11,5 +11,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Sunucu http://localhost:${port} adresinde çalışıyor`);
+  console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`);
 });
