@@ -1,0 +1,25 @@
+{
+  "name": "dice",
+  "version": "1.0.0",
+  "description": "dice game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/yazboz/dice"
+  },
+  "keywords": [
+    "dice",
+    "game",
+    "web"
+  ],
+  "author": "Fatihhan Güleç, Rıza Selçukhan Güleç",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
